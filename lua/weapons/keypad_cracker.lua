@@ -1,11 +1,13 @@
 AddCSLuaFile()
 
-if(SERVER) then
+local keypad_crack_time = CreateConVar("keypad_crack_time", "30", {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Seconds for keypad cracker to crack keypad")
+
+if SERVER then
 	util.AddNetworkString("KeypadCracker_Hold")
 	util.AddNetworkString("KeypadCracker_Sparks")
 end
 
-if(CLIENT) then
+if CLIENT then
 	SWEP.PrintName = "Keypad Cracker"
 	SWEP.Slot = 4
 	SWEP.SlotPos = 1
@@ -47,12 +49,14 @@ SWEP.IdleStance = "slam"
 function SWEP:Initialize()
 	self:SetWeaponHoldType(self.IdleStance)
 
-	if(SERVER) then
+	if SERVER then
 		net.Start("KeypadCracker_Hold")
 			net.WriteEntity(self)
 			net.WriteBit(true)
 		net.Broadcast()
 	end
+
+	self.KeyCrackTime = keypad_crack_time:GetInt()
 end	
 
 function SWEP:PrimaryAttack()
@@ -60,12 +64,12 @@ function SWEP:PrimaryAttack()
 
 
 	
-	if(self.IsCracking or not IsValid(self.Owner)) then return end
+	if self.IsCracking or not IsValid(self.Owner) then return end
 
 	local tr = self.Owner:GetEyeTrace()
 	local ent = tr.Entity
 
-	if(IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and (ent:GetClass() == "keypad" or ent:GetClass() == "keypad_wire")) then
+	if IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and (ent:GetClass() == "keypad" or ent:GetClass() == "keypad_wire") then
 		self.IsCracking = true
 		self.StartCrack = CurTime()
 		self.EndCrack = CurTime() + self.KeyCrackTime
@@ -73,14 +77,14 @@ function SWEP:PrimaryAttack()
 		self:SetWeaponHoldType("pistol") -- TODO: Send as networked message for other clients to receive
 
 		
-		if(SERVER) then
+		if SERVER then
 			net.Start("KeypadCracker_Hold")
 				net.WriteEntity(self)
 				net.WriteBit(true)
 			net.Broadcast()
 
 			timer.Create("KeyCrackSounds: "..self:EntIndex(), 1, self.KeyCrackTime, function()
-				if(IsValid(self) and self.IsCracking) then
+				if IsValid(self) and self.IsCracking then
 					self:EmitSound(self.KeyCrackSound, 100, 100)
 					
 				end
@@ -90,7 +94,7 @@ function SWEP:PrimaryAttack()
 			
 			local entindex = self:EntIndex()
 			timer.Create("KeyCrackDots: "..entindex, 0.5, 0, function()
-				if(not IsValid(self)) then
+				if not IsValid(self) then
 					timer.Destroy("KeyCrackDots: "..entindex)
 				else
 					local len = string.len(self.Dots)
@@ -106,7 +110,7 @@ end
 function SWEP:Holster()
 	self.IsCracking = false
 
-	if(SERVER) then
+	if SERVER then
 		timer.Destroy("KeyCrackSounds: "..self:EntIndex())
 	else
 		timer.Destroy("KeyCrackDots: "..self:EntIndex())
@@ -126,7 +130,7 @@ function SWEP:Succeed()
 	local ent = tr.Entity
 	self:SetWeaponHoldType(self.IdleStance)
 
-	if(SERVER and IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and (ent:GetClass() == "keypad" or ent:GetClass() == "keypad_wire")) then
+	if SERVER and IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and (ent:GetClass() == "keypad" or ent:GetClass() == "keypad_wire") then
 		ent:Process(true)
 
 		net.Start("KeypadCracker_Hold")
@@ -139,7 +143,7 @@ function SWEP:Succeed()
 		net.Broadcast()
 	end
 
-	if(SERVER) then
+	if SERVER then
 		timer.Destroy("KeyCrackSounds: "..self:EntIndex())
 	else
 		timer.Destroy("KeyCrackDots: "..self:EntIndex())
@@ -151,7 +155,7 @@ function SWEP:Fail()
 
 	self:SetWeaponHoldType(self.IdleStance)
 
-	if(SERVER) then
+	if SERVER then
 		net.Start("KeypadCracker_Hold")
 			net.WriteEntity(self)
 			net.WriteBit(true)
@@ -164,17 +168,17 @@ function SWEP:Fail()
 end
 
 function SWEP:Think()
-	if(not self.StartCrack) then
+	if not self.StartCrack then
 		self.StartCrack = 0
 		self.EndCrack = 0
 	end
 
-	if(self.IsCracking and IsValid(self.Owner)) then
+	if self.IsCracking and IsValid(self.Owner) then
 		local tr = self.Owner:GetEyeTrace()
 
-		if(not IsValid(tr.Entity) or tr.HitPos:Distance(self.Owner:GetShootPos()) > 50 or (tr.Entity:GetClass() ~= "keypad" and tr.Entity:GetClass() ~= "keypad_wire")) then
+		if not IsValid(tr.Entity) or tr.HitPos:Distance(self.Owner:GetShootPos()) > 50 or (tr.Entity:GetClass() ~= "keypad" and tr.Entity:GetClass() ~= "keypad_wire") then
 			self:Fail()
-		elseif(self.EndCrack <= CurTime()) then
+		elseif self.EndCrack <= CurTime() then
 			self:Succeed()
 		end
 	else
@@ -196,7 +200,7 @@ if(CLIENT) then
 	})
 
 	function SWEP:DrawHUD()
-		if(self.IsCracking) then
+		if self.IsCracking then
 			--[[self.Dots = self.Dots or ""
 
 			local w, h = ScrW(), ScrH()
@@ -213,7 +217,7 @@ if(CLIENT) then
 			draw.RoundedBox(8, x+8, y+8, BarWidth, height-16, Color(255 - (status * 255), 0 + (status*255), 0, 255))
 
 			draw.SimpleText("Cracking"..self.Dots, "KeypadCrack", w/2, h/2 + height/2, color_white, 1, 1) shit]]
-			if(not self.StartCrack) then
+			if not self.StartCrack then
 				self.StartCrack = CurTime()
 				self.EndCrack = CurTime() + self.KeyCrackTime
 			end
@@ -254,7 +258,7 @@ if(CLIENT) then
 	function SWEP:GetViewModelPosition(pos, ang)
 		
 		
-		if(self.IsCracking) then
+		if self.IsCracking then
 			local delta = FrameTime() * 3.5
 			self.LowerPercent = math.Clamp(self.LowerPercent - delta, 0, 1)
 		else
@@ -264,6 +268,7 @@ if(CLIENT) then
 		
 		ang:RotateAroundAxis(ang:Forward(), self.DownAngle.p * self.LowerPercent)
 		ang:RotateAroundAxis(ang:Right(), self.DownAngle.p * self.LowerPercent)
+
 		return self.BaseClass.GetViewModelPosition(self, pos, ang)
 	end
 
@@ -271,8 +276,8 @@ if(CLIENT) then
 		local ent = net.ReadEntity()
 		local state = (net.ReadBit() == 1)
 
-		if(IsValid(ent) and ent:IsWeapon() and ent:GetClass() == "keypad_cracker" and (not game.SinglePlayer()) and ent.SetWeaponHoldType) then
-			if(not state) then
+		if IsValid(ent) and ent:IsWeapon() and ent:GetClass() == "keypad_cracker" and not game.SinglePlayer() and ent.SetWeaponHoldType then
+			if not state then
 				ent:SetWeaponHoldType(ent.IdleStance)
 				ent.IsCracking = false
 			else
@@ -285,7 +290,7 @@ if(CLIENT) then
 	net.Receive("KeypadCracker_Sparks", function()
 		local ent = net.ReadEntity()
 		
-		if(IsValid(ent)) then
+		if IsValid(ent) then
 			local vPoint = ent:GetPos()
 			local effect = EffectData()
 			effect:SetStart(vPoint)
