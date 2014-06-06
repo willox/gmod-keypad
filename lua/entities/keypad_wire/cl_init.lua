@@ -4,6 +4,8 @@ include("sh_init.lua")
 	We are going to borrow offsets etc from Robbis_1's keypad here
 ]]
 
+local jumble_numbers = CreateClientConVar("keypad_jumble_numbers", "1", true, false)
+
 -- lel i guess you can't look at eye angles any more sucka huh
 local keys = {1, 2, 3, 4, 5, 6, 7, 8, 9}
 local key_aliases = {}
@@ -50,7 +52,7 @@ function ENT:Draw()
 
 	local key_aliases = key_aliases
 
-	if not self:GetSecure() then
+	if not self:GetSecure() or not jumble_numbers:GetBool() then
 		key_aliases = {1, 2, 3, 4, 5, 6, 7, 8, 9}
 	end
 
