@@ -167,13 +167,13 @@ function ENT:Process(granted)
 			for i = 0, repeats do
 				timer.Simple(length * i + delay * i, function()
 					if(IsValid(self) and IsValid(owner)) then
-						numpad.Activate(owner, key)
+						numpad.Activate(owner, key, true)
 					end
 				end)
 
 				timer.Simple(length * (i + 1) + delay * i, function()
 					if(IsValid(self) and IsValid(owner)) then
-						numpad.Deactivate(owner, key)
+						numpad.Deactivate(owner, key, true)
 					end
 				end)
 			end

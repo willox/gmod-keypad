@@ -1,3 +1,5 @@
+-- This is sorta horrible
+
 AddCSLuaFile()
 
 local keypad_crack_time = CreateConVar("keypad_crack_time", "30", {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Seconds for keypad cracker to crack keypad")
@@ -201,28 +203,12 @@ if(CLIENT) then
 
 	function SWEP:DrawHUD()
 		if self.IsCracking then
-			--[[self.Dots = self.Dots or ""
-
-			local w, h = ScrW(), ScrH()
-
-			local x, y, width, height = (w/2-w/10), (h/ 2), (w/5), (h/15)
-
-			draw.RoundedBox(8, x, y, width, height, self.BoxColor)
-
-			local time = self.EndCrack - self.StartCrack
-			local curtime = CurTime() - self.StartCrack
-			local status = curtime/time
-			local BarWidth = status * (width - 16) + 8
-
-			draw.RoundedBox(8, x+8, y+8, BarWidth, height-16, Color(255 - (status * 255), 0 + (status*255), 0, 255))
-
-			draw.SimpleText("Cracking"..self.Dots, "KeypadCrack", w/2, h/2 + height/2, color_white, 1, 1) shit]]
 			if not self.StartCrack then
 				self.StartCrack = CurTime()
 				self.EndCrack = CurTime() + self.KeyCrackTime
 			end
 
-			local frac = math.Clamp((CurTime() - self.StartCrack) / (self.EndCrack - self.StartCrack), 0, 1) -- Between 0 and 1 (a fraction omg)
+			local frac = math.Clamp((CurTime() - self.StartCrack) / (self.EndCrack - self.StartCrack), 0, 1) -- Between 0 and 1 (a fraction omg segregation)
 			
 			local dots = self.Dots or ""
 			
