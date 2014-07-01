@@ -25,7 +25,7 @@ TOOL.ClientConVar['init_delay_granted'] = '0'
 TOOL.ClientConVar['init_delay_denied'] = '0'
 
 TOOL.ClientConVar['output_on'] = '1'
-TOOL.ClientConVar['output_off'] = '1'
+TOOL.ClientConVar['output_off'] = '0'
 
 -- cleanup.Register("keypads") -- Handled by keypad_willox.lua
 
@@ -168,7 +168,7 @@ if(CLIENT) then
 		ply:ConCommand("keypad_willox_wire_init_delay_granted 0")
 		ply:ConCommand("keypad_willox_wire_init_delay_denied 0")
         ply:ConCommand("keypad_willox_wire_output_on 1")
-        ply:ConCommand("keypad_willox_wire_output_off 1")
+        ply:ConCommand("keypad_willox_wire_output_off 0")
 	end
 
 	concommand.Add("keypad_willox_wire_reset", ResetSettings)
@@ -188,8 +188,8 @@ if(CLIENT) then
     		CPanel:CheckBox("Weld", "keypad_willox_wire_weld")
     		CPanel:CheckBox("Freeze", "keypad_willox_wire_freeze")
 
-            CPanel:NumSlider("Access Granted Out:", "keypad_willox_wire_output_on", -10, 10, 0)
-            CPanel:NumSlider("Access Denied Out:", "keypad_willox_wire_output_off", -10, 10, 0)
+            CPanel:NumSlider("Output On:", "keypad_willox_wire_output_on", -10, 10, 0)
+            CPanel:NumSlider("Output Off:", "keypad_willox_wire_output_off", -10, 10, 0)
 
     		local granted = vgui.Create("DForm")
     			granted:SetName("Access Granted Settings")
