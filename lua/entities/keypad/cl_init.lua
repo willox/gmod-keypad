@@ -1,10 +1,12 @@
 include "sh_init.lua"
 
-surface.CreateFont("KeypadAbort", {font = "Trebuchet", size = 80, weight = 900})
-surface.CreateFont("KeypadOK", {font = "Trebuchet", size = 100, weight = 900})
-surface.CreateFont("KeypadNumber", {font = "Trebuchet", size = 140, weight = 900})
+surface.CreateFont("KeypadAbort", {font = "Roboto", size = 45, weight = 600})
+surface.CreateFont("KeypadOK", {font = "Roboto", size = 60, weight = 600})
+surface.CreateFont("KeypadNumber", {font = "Roboto", size = 70, weight = 600})
+surface.CreateFont("KeypadEntry", {font = "Roboto", size = 120, weight = 900})
 
-local mat = CreateMaterial("keypad_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaasaae", "VertexLitGeneric", {
+
+local mat = CreateMaterial("keypad_base", "VertexLitGeneric", {
 	["$basetexture"] = "white",
 	["$color"] = "{ 35 35 35 }",
 })
@@ -26,9 +28,9 @@ function ENT:Draw()
 		ang:RotateAroundAxis(ang:Right(), -90)
 		ang:RotateAroundAxis(ang:Up(), 90)	
 
-	local w, h = self.Maxs.y - self.Mins.y, self.Maxs.z - self.Mins.z
+	local w, h = self.Maxs.y - self.Mins.y , self.Maxs.z - self.Mins.z
 
-	local scale = 0.01
+	local scale = 0.02 -- A high scale avoids surface call integerising from ruining aesthetics
 
 	cam.Start3D2D(pos, ang, scale)
 		self:Paint(math.floor(w / scale), math.floor(h / scale))
@@ -42,6 +44,17 @@ local elements = {
 		w = 0.85,
 		h = 0.25,
 		color = Color(50, 75, 50, 255),
+		render = function(self, x, y)
+			surface.SetFont("KeypadEntry")
+
+			local text = self:GetText()
+
+			local textw, texth = surface.GetTextSize(text)			
+
+			surface.SetTextColor(color_white)
+			surface.SetTextPos(x - textw / 2, y - texth / 2)
+			surface.DrawText(text)
+		end,
 	},
 	{ -- ABORT
 		x = 0.075,
@@ -79,8 +92,6 @@ do -- Create numbers
 		}
 
 		table.insert(elements, element)
-
-		print(i, column, row)
 	end
 end
 
@@ -97,15 +108,21 @@ function ENT:Paint(w, h, x, y)
 			h * element.h
 		)
 
+		local cx = w * element.x + (w * element.w) / 2
+		local cy = h * element.y + (h * element.h) / 2
+
 		if element.text then
 			surface.SetFont(element.font or "KeypadNumber")
 
 			local textw, texth = surface.GetTextSize(element.text)
 
 			surface.SetTextColor(color_black)
-			surface.SetTextPos(w * element.x + (w * element.w / 2) - textw / 2, h * element.y + (h * element.h / 2) - texth / 2)
+			surface.SetTextPos(cx - textw / 2, h * element.y + (h * element.h / 2) - texth / 2)
 			surface.DrawText(element.text)
+		end
 
+		if element.render then
+			element.render(self, cx, h * element.y + (h * element.h / 2))
 		end
 	end
 end

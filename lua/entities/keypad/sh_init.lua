@@ -28,6 +28,8 @@ function ENT:Initialize()
 			phys:Wake()
 		end
 	end
+
+	self:SetText("HELLO")
 end
 
 function ENT:SetupDataTables()
