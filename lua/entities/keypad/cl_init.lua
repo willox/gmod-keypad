@@ -1,88 +1,31 @@
 include "sh_init.lua"
-
-local crosshair = CreateConVar("keypad_crosshair", "0")
+include "cl_maths.lua"
 
 surface.CreateFont("KeypadAbort", {font = "Roboto", size = 45, weight = 900})
 surface.CreateFont("KeypadOK", {font = "Roboto", size = 60, weight = 900})
 surface.CreateFont("KeypadNumber", {font = "Roboto", size = 70, weight = 600})
 surface.CreateFont("KeypadEntry", {font = "Roboto", size = 120, weight = 900})
 
-local mat = CreateMaterial("keypad_aaaaabasea", "VertexLitGeneric", {
+local mat = CreateMaterial("aeypad_baaaaaaaaaaaaase", "VertexLitGeneric", {
 	["$basetexture"] = "white",
-	["$color"] = "{ 38 38 38 }",
+	["$color"] = "{ 36 36 36 }",
 })
-
-ENT.CursorX = 0
-ENT.CursorY = 0
-
-ENT.Scale = 0.02
-
-function ENT:Think()
-	local ply = LocalPlayer()
-
-	if not IsValid(ply) then
-		return
-	end
-
-
-	local scale = self.Scale
-
-	local pos, ang = self:CalculateRenderPos()
-	local normal = self:GetForward()
-	
-	local intersection = util.IntersectRayWithPlane(ply:EyePos(), ply:GetAimVector(), pos, normal)
-	
-	if not intersection then
-		self.CursorX, self.CursorY = 0, 0
-
-		return
-	end
-
-	local diff = pos - intersection
-	diff = diff * ang:Forward()
-
-	debugoverlay.Cross(pos, 4, 0.02, Color(255, 0, 0), false)
-	debugoverlay.Cross(pos + ang:Forward() * self.Width, 4, 0.02, Color(0, 255, 0), false)
-	debugoverlay.Cross(pos + ang:Right() * self.Height, 4, 0.02, Color(0, 0, 255), false)
-	
-	--print((diff * ang:Right()):Length())
-	print((diff):Length())
-	--print("X", x, self.Width)
-end
-
-function ENT:CalculateRenderPos()
-	local pos = self:GetPos()
-		pos:Add(self:GetForward() * self.Maxs.x) -- Translate to front
-		pos:Add(self:GetRight() * self.Maxs.y) -- Translate to left
-		pos:Add(self:GetUp() * self.Maxs.z) -- Translate to top
-
-		pos:Add(self:GetForward() * 0.05) -- Pop out of front to stop culling
-
-
-	local ang = self:GetAngles()
-		ang:RotateAroundAxis(ang:Right(), -90)
-		ang:RotateAroundAxis(ang:Up(), 90)	
-
-	return pos, ang
-end
 
 function ENT:Draw()
 	render.SetMaterial(mat)
 
 	render.DrawBox(self:GetPos(), self:GetAngles(), self.Mins, self.Maxs, color_white, true)
 
-	local pos, ang = self:CalculateRenderPos()
+	local pos, ang = self:CalculateRenderPos(), self:CalculateRenderAng()
 
-	local w, h = self.Width, self.Height
+	local w, h = self.Width2D, self.Height2D
+	local x, y = self:CalculateCursorPos()
 
 	local scale = self.Scale -- A high scale avoids surface call integerising from ruining aesthetics
 
-	cam.Start3D2D(pos, ang, scale)
-		self:Paint(math.floor(w / scale), math.floor(h / scale), self.CursorX, self.CursorY)
+	cam.Start3D2D(pos, ang, self.Scale)
+		self:Paint(w, h, x, y)
 	cam.End3D2D()
-
-
-
 end
 
 local elements = {
@@ -146,7 +89,28 @@ do -- Create numbers
 	end
 end
 
+function ENT:GetHoveredElement()
+	local scale = self.Scale
+
+	local w, h = self.Width2D, self.Height2D
+	local x, y = self:CalculateCursorPos()
+
+	for _, element in ipairs(elements) do
+		local element_x = w * element.x
+		local element_y = h * element.y
+		local element_w = w * element.w
+		local element_h = h * element.h
+
+		if 	element_x < x and element_x + element_w > x and
+			element_y < y and element_y + element_h > y 
+		then
+			return element
+		end
+	end
+end
+
 function ENT:Paint(w, h, x, y)
+	local hovered = self:GetHoveredElement()
 
 	for k, element in ipairs(elements) do
 		surface.SetDrawColor(element.color)
@@ -156,13 +120,8 @@ function ENT:Paint(w, h, x, y)
 		local element_w = w * element.w
 		local element_h = h * element.h
 
-		if element.hovercolor then
-			if 
-				element_x < x and element_x + element_w > x and
-				element_y < y and element_y + element_h > y 
-			then
-				surface.SetDrawColor(element.hovercolor)
-			end
+		if element == hovered and element.hovercolor then
+			surface.SetDrawColor(element.hovercolor)
 		end
 
 		surface.DrawRect(

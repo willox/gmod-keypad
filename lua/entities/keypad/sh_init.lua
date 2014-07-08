@@ -4,6 +4,8 @@ ENT.Model = Model("models/props_lab/keypad.mdl")
 
 ENT.Spawnable = true
 
+ENT.Scale = 0.02
+
 ENT.Status_None = 0
 ENT.Status_Granted = 1
 ENT.Status_Denied = 2
@@ -15,10 +17,12 @@ ENT.Command_Reset = 2
 function ENT:Initialize()
 	self:SetModel(self.Model)
 
-	self.Mins = self:OBBMins()
-	self.Maxs = self:OBBMaxs()
+	if CLIENT then
+		self.Mins = self:OBBMins()
+		self.Maxs = self:OBBMaxs()
 
-	self.Width, self.Height = self.Maxs.y - self.Mins.y , self.Maxs.z - self.Mins.z
+		self.Width2D, self.Height2D = (self.Maxs.y - self.Mins.y) / self.Scale , (self.Maxs.z - self.Mins.z) / self.Scale
+	end
 
 	if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
