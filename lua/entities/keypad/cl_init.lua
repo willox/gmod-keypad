@@ -1,5 +1,7 @@
 include "sh_init.lua"
 
+local crosshair = CreateConVar("keypad_crosshair", "0")
+
 surface.CreateFont("KeypadAbort", {font = "Roboto", size = 45, weight = 900})
 surface.CreateFont("KeypadOK", {font = "Roboto", size = 60, weight = 900})
 surface.CreateFont("KeypadNumber", {font = "Roboto", size = 70, weight = 600})
@@ -10,8 +12,8 @@ local mat = CreateMaterial("keypad_aaaaabasea", "VertexLitGeneric", {
 	["$color"] = "{ 38 38 38 }",
 })
 
-ENT.TraceX = 0
-ENT.TraceY = 0
+ENT.CursorX = 0
+ENT.CursorY = 0
 
 ENT.Scale = 0.02
 
@@ -22,28 +24,33 @@ function ENT:Think()
 		return
 	end
 
-	local pos = self:GetRenderPos()
-	local ang = self:GetAngles():Forward()
 
 	local scale = self.Scale
 
-	local intersect = util.IntersectRayWithPlane(ply:EyePos(), ply:GetAimVector(), pos, ang)
+	local pos, ang = self:CalculateRenderPos()
+	local normal = self:GetForward()
 	
-	if intersect then
-		intersect:Mul(-1)
-		intersect:Add(pos)
+	local intersection = util.IntersectRayWithPlane(ply:EyePos(), ply:GetAimVector(), pos, normal)
+	
+	if not intersection then
+		self.CursorX, self.CursorY = 0, 0
 
-		local x = intersect.x / scale
-		local y = intersect.z / scale
-
-		self.TraceX, self.TraceY = x, y
+		return
 	end
 
+	local diff = pos - intersection
+	diff = diff * ang:Forward()
 
-	self:NextThink(CurTime() + 0.1)
+	debugoverlay.Cross(pos, 4, 0.02, Color(255, 0, 0), false)
+	debugoverlay.Cross(pos + ang:Forward() * self.Width, 4, 0.02, Color(0, 255, 0), false)
+	debugoverlay.Cross(pos + ang:Right() * self.Height, 4, 0.02, Color(0, 0, 255), false)
+	
+	--print((diff * ang:Right()):Length())
+	print((diff):Length())
+	--print("X", x, self.Width)
 end
 
-function ENT:GetRenderPos()
+function ENT:CalculateRenderPos()
 	local pos = self:GetPos()
 		pos:Add(self:GetForward() * self.Maxs.x) -- Translate to front
 		pos:Add(self:GetRight() * self.Maxs.y) -- Translate to left
@@ -60,21 +67,22 @@ function ENT:GetRenderPos()
 end
 
 function ENT:Draw()
-
-
 	render.SetMaterial(mat)
 
 	render.DrawBox(self:GetPos(), self:GetAngles(), self.Mins, self.Maxs, color_white, true)
 
-	local pos, ang = self:GetRenderPos()
+	local pos, ang = self:CalculateRenderPos()
 
-	local w, h = self.Maxs.y - self.Mins.y , self.Maxs.z - self.Mins.z
+	local w, h = self.Width, self.Height
 
 	local scale = self.Scale -- A high scale avoids surface call integerising from ruining aesthetics
 
 	cam.Start3D2D(pos, ang, scale)
-		self:Paint(math.floor(w / scale), math.floor(h / scale), self.TraceX, self.TraceY)
+		self:Paint(math.floor(w / scale), math.floor(h / scale), self.CursorX, self.CursorY)
 	cam.End3D2D()
+
+
+
 end
 
 local elements = {
@@ -182,5 +190,4 @@ function ENT:Paint(w, h, x, y)
 		end
 
 	end
-
 end

@@ -18,6 +18,8 @@ function ENT:Initialize()
 	self.Mins = self:OBBMins()
 	self.Maxs = self:OBBMaxs()
 
+	self.Width, self.Height = self.Maxs.y - self.Mins.y , self.Maxs.z - self.Mins.z
+
 	if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 
