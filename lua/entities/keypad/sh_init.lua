@@ -12,7 +12,7 @@ ENT.Status_Denied = 2
 
 ENT.Command_Enter = 0
 ENT.Command_Accept = 1
-ENT.Command_Reset = 2
+ENT.Command_Abort = 2
 
 function ENT:Initialize()
 	self:SetModel(self.Model)
@@ -34,7 +34,7 @@ function ENT:Initialize()
 		end
 	end
 
-	self:SetText("123")
+	self:SetText("****")
 end
 
 function ENT:SetupDataTables()

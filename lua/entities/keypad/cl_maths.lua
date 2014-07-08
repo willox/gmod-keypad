@@ -7,6 +7,16 @@ function ENT:CalculateCursorPos()
 		return 0, 0
 	end
 
+	local tr = util.TraceLine({
+		start = ply:EyePos(),
+		endpos = ply:EyePos() + ply:GetAimVector() * 35,
+		filter = ply
+	})
+
+	if tr.Entity ~= self then
+		return 0, 0
+	end
+
 	local scale = self.Scale
 
 	local pos, ang = self:CalculateRenderPos(), self:CalculateRenderAng()
