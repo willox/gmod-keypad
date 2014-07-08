@@ -12,7 +12,6 @@ ENT.Command_Enter = 0
 ENT.Command_Accept = 1
 ENT.Command_Reset = 2
 
-
 function ENT:Initialize()
 	self:SetModel(self.Model)
 
@@ -29,7 +28,7 @@ function ENT:Initialize()
 		end
 	end
 
-	self:SetText("HELLO")
+	self:SetText("123")
 end
 
 function ENT:SetupDataTables()
