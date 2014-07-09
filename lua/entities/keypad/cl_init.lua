@@ -2,7 +2,7 @@ include "sh_init.lua"
 include "cl_maths.lua"
 include "cl_panel.lua"
 
-local mat = CreateMaterial("aeypad_baaaaaaaaaaaaase", "VertexLitGeneric", {
+local mat = CreateMaterial("aeypad_baaaaaaaaaaaaaaaaaaase", "VertexLitGeneric", {
 	["$basetexture"] = "white",
 	["$color"] = "{ 36 36 36 }",
 })
@@ -25,5 +25,12 @@ function ENT:Draw()
 end
 
 function ENT:SendCommand(command, data)
-	print(command, data)
+	net.Start("Keypad")
+		net.WriteEntity(self)
+		net.WriteUInt(command, 4)
+
+		if data then
+			net.WriteUInt(data, 8)
+		end
+	net.SendToServer()
 end

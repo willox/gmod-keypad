@@ -9,7 +9,7 @@ function ENT:CalculateCursorPos()
 
 	local tr = util.TraceLine({
 		start = ply:EyePos(),
-		endpos = ply:EyePos() + ply:GetAimVector() * 35,
+		endpos = ply:EyePos() + ply:GetAimVector() * 65,
 		filter = ply
 	})
 

@@ -2,20 +2,22 @@ local keypad_classes = {
 	["keypad"] = true
 }
 
-hook.Add("PlayerButtonDown", "Keypad", function(ply, button)
-	if button ~= KEY_E then
+hook.Add("PlayerBindPress", "Keypad", function(ply, bind, pressed)
+	if not pressed or not string.find(bind, "+use", nil, true) then
 		return
 	end
 
 	local tr = util.TraceLine({
 		start = ply:EyePos(),
-		endpos = ply:EyePos() + ply:GetAimVector() * 35,
+		endpos = ply:EyePos() + ply:GetAimVector() * 65,
 		filter = ply
 	})
 
 	local ent = tr.Entity
 
-	if not IsValid(ent) or not keypad_classes[ent:GetClass()] then
+	print(ent)
+
+	if not IsValid(ent) or not ent.IsKeypad then
 		return
 	end
 
@@ -26,4 +28,6 @@ hook.Add("PlayerButtonDown", "Keypad", function(ply, button)
 	end
 
 	element.click(ent)
+
+	return
 end)

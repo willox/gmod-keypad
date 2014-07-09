@@ -2,6 +2,7 @@ surface.CreateFont("KeypadAbort", {font = "Roboto", size = 45, weight = 900})
 surface.CreateFont("KeypadOK", {font = "Roboto", size = 60, weight = 900})
 surface.CreateFont("KeypadNumber", {font = "Roboto", size = 70, weight = 600})
 surface.CreateFont("KeypadEntry", {font = "Roboto", size = 120, weight = 900})
+surface.CreateFont("KeypadStatus", {font = "Roboto", size = 60, weight = 900})
 
 local elements = {
 	{ -- Screen
@@ -11,15 +12,39 @@ local elements = {
 		h = 0.25,
 		color = Color(50, 75, 50, 255),
 		render = function(self, x, y)
-			surface.SetFont("KeypadEntry")
+			local status = self:GetStatus()
 
-			local text = self:GetText()
+			if status == self.Status_None then
+				surface.SetFont("KeypadEntry")
 
-			local textw, texth = surface.GetTextSize(text)			
+				local text = self:GetText()
 
-			surface.SetTextColor(color_white)
-			surface.SetTextPos(x - textw / 2, y - texth / 2)
-			surface.DrawText(text)
+				local textw, texth = surface.GetTextSize(text)			
+
+				surface.SetTextColor(color_white)
+				surface.SetTextPos(x - textw / 2, y - texth / 2)
+				surface.DrawText(text)
+			elseif status == self.Status_Denied then
+				surface.SetFont("KeypadStatus")
+
+				local text = "DENIED"
+
+				local textw, texth = surface.GetTextSize(text)		
+
+				surface.SetTextColor(Color(255, 0, 0))
+				surface.SetTextPos(x - textw / 2, y - texth / 2)
+				surface.DrawText(text)
+			elseif status == self.Status_Granted then
+				surface.SetFont("KeypadStatus")
+
+				local text = "GRANTED"
+
+				local textw, texth = surface.GetTextSize(text)		
+
+				surface.SetTextColor(Color(0, 255, 0))
+				surface.SetTextPos(x - textw / 2, y - texth / 2)
+				surface.DrawText(text)
+			end
 		end,
 	},
 	{ -- ABORT
