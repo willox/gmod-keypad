@@ -5,13 +5,13 @@ AddCSLuaFile "sh_init.lua"
 
 include "sh_init.lua"
 
-util.AddNetworkString("Keypad")
+util.AddNetworkString("Keypad_Wire")
 
 
-net.Receive("Keypad", function(_, ply)
+net.Receive("Keypad_Wire", function(_, ply)
 	local ent = net.ReadEntity()
 
-	if not IsValid(ply) or not IsValid(ent) or not ent:GetClass():lower() == "keypad" then
+	if not IsValid(ply) or not IsValid(ent) or not ent:GetClass():lower() == "keypad_wire" then
 		return
 	end
 
@@ -58,7 +58,7 @@ function ENT:GetValue()
 end
 
 function ENT:Process(granted)
-	local length, repeats, delay, initdelay, owner, key
+	local length, repeats, delay, initdelay, owner, outputKey
 
 	if(granted) then
 		self:SetStatus(self.Status_Granted)
@@ -68,7 +68,7 @@ function ENT:Process(granted)
 		delay = self.KeypadData.DelayGranted
 		initdelay = self.KeypadData.InitDelayGranted
 		owner = self.KeypadData.Owner
-		key = tonumber(self.KeypadData.KeyGranted) or 0
+		outputKey = "Access Granted"
 	else
 		self:SetStatus(self.Status_Denied)
 
@@ -77,7 +77,7 @@ function ENT:Process(granted)
 		delay = self.KeypadData.DelayDenied
 		initdelay = self.KeypadData.InitDelayDenied
 		owner = self.KeypadData.Owner
-		key = tonumber(self.KeypadData.KeyDenied) or 0
+		outputKey = "Access Denied"
 	end
 
 	timer.Simple(math.max(initdelay + length * (repeats + 1) + delay * repeats + 0.25, 2), function() -- 0.25 after last timer
@@ -91,13 +91,13 @@ function ENT:Process(granted)
 			for i = 0, repeats do
 				timer.Simple(length * i + delay * i, function()
 					if(IsValid(self) and IsValid(owner)) then
-						numpad.Activate(owner, key, true)
+						Wire_TriggerOutput(self, outputKey, self.KeypadData.OutputOn)
 					end
 				end)
 
 				timer.Simple(length * (i + 1) + delay * i, function()
 					if(IsValid(self) and IsValid(owner)) then
-						numpad.Deactivate(owner, key, true)
+						Wire_TriggerOutput(self, outputKey, self.KeypadData.OutputOff)
 					end
 				end)
 			end
@@ -126,4 +126,7 @@ function ENT:Reset()
 	self:SetValue("")
 	self:SetStatus(self.Status_None)
 	self:SetSecure(self.KeypadData.Secure)
+
+	Wire_TriggerOutput(self, "Access Granted", self.KeypadData.OutputOff)
+	Wire_TriggerOutput(self, "Access Denied", self.KeypadData.OutputOff)
 end

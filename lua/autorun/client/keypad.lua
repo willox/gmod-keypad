@@ -1,9 +1,6 @@
-local keypad_classes = {
-	["keypad"] = true
-}
 
 hook.Add("PlayerBindPress", "Keypad", function(ply, bind, pressed)
-	if not pressed or not string.find(bind, "+use", nil, true) then
+	if not pressed then
 		return
 	end
 
@@ -15,19 +12,17 @@ hook.Add("PlayerBindPress", "Keypad", function(ply, bind, pressed)
 
 	local ent = tr.Entity
 
-	print(ent)
-
 	if not IsValid(ent) or not ent.IsKeypad then
 		return
 	end
 
-	local element = ent:GetHoveredElement()
+	if string.find(bind, "+use", nil, true) then
+		local element = ent:GetHoveredElement()
 
-	if not element or not element.click then
-		return
+		if not element or not element.click then
+			return
+		end
+
+		element.click(ent)
 	end
-
-	element.click(ent)
-
-	return
 end)

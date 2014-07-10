@@ -29,7 +29,7 @@ TOOL.ClientConVar['output_off'] = '0'
 
 -- cleanup.Register("keypads") -- Handled by keypad_willox.lua
 
-if(CLIENT) then
+if CLIENT then
 	language.Add("tool.keypad_willox_wire.name", "Keypad - Wire")
 	language.Add("tool.keypad_willox_wire.0", "Left Click: Create, Right Click: Update")
 	language.Add("tool.keypad_willox_wire.desc", "Creates Keypads for secure access")
@@ -72,9 +72,9 @@ end
 
 function TOOL:RightClick(tr)
     if not WireLib then return false end
-	if(IsValid(tr.Entity) and tr.Entity:GetClass() ~= "keypad_wire") then return false end
+	if not IsValid(tr.Entity) or not tr.Entity:GetClass():lower() == "keypad_wire" then return false end
 
-	if(CLIENT) then return true end
+	if CLIENT then return true end
 
 	local ply = self:GetOwner()
 	local password = tonumber(ply:GetInfo("keypad_willox_wire_password"))
@@ -82,13 +82,13 @@ function TOOL:RightClick(tr)
 	local spawn_pos = tr.HitPos
 	local trace_ent = tr.Entity
 
-	if(password == nil or (string.len(tostring(password)) > 4) or (string.find(tostring(password), "0"))) then
+	if password == nil or (string.len(tostring(password)) > 4) or (string.find(tostring(password), "0")) then
 		ply:PrintMessage(3, "Invalid password!")
 		return false
 	end
 
-	if(trace_ent:GetClass() == "keypad_wire" and trace_ent.KeypadData.Owner == ply) then
-		self:SetupKeypad(trace_ent, password) -- validated password
+	if trace_ent.KeypadData.Owner == ply then
+		self:SetupKeypad(trace_ent, password)
 
 		return true
 	end
@@ -96,9 +96,9 @@ end
 
 function TOOL:LeftClick(tr)
     if not WireLib then return false end
-	if(IsValid(tr.Entity) and tr.Entity:GetClass() == "player") then return false end
+	if IsValid(tr.Entity) and tr.Entity:GetClass() == "player" then return false end
 
-	if(CLIENT) then return true end
+	if CLIENT then return true end
 
 	local ply = self:GetOwner()
 	local password = self:GetClientNumber("password")
@@ -106,46 +106,38 @@ function TOOL:LeftClick(tr)
 	local spawn_pos = tr.HitPos + tr.HitNormal
 	local trace_ent = tr.Entity
 
-	if(password == nil or (string.len(tostring(password)) > 4) or (string.find(tostring(password), "0"))) then
+	if password == nil or (string.len(tostring(password)) > 4) or (string.find(tostring(password), "0")) then
 		ply:PrintMessage(3, "Invalid password!")
 		return false
 	end
 
-	if(not self:GetWeapon():CheckLimit("keypads")) then return false end
+	if not self:GetWeapon():CheckLimit("keypads") then return false end
 
 	local ent = ents.Create("keypad_wire")
 	ent:SetPos(spawn_pos)
 	ent:SetAngles(tr.HitNormal:Angle())
 	ent:Spawn()
-	ent:SetPlayer(ply)
-	ent:SetAngles(tr.HitNormal:Angle())
-	ent:Activate()
 
-	local phys = ent:GetPhysicsObject() -- rely on this being valid
+	ent:SetPlayer(ply)
+
+	local freeze = util.tobool(self:GetClientNumber("freeze"))
+	local weld = util.tobool(self:GetClientNumber("weld"))
+
+	if freeze or weld then
+		local phys = ent:GetPhysicsObject() 
+
+		if IsValid(phys) then
+			phys:EnableMotion(false)
+		end
+	end
+
+	if weld then
+		local weld = constraint.Weld(ent, trace_ent, 0, 0, 0, true, false)
+	end
 
 	self:SetupKeypad(ent, password)
 
 	undo.Create("Keypad")
-		if(util.tobool(self:GetClientNumber("freeze"))) then
-			phys:EnableMotion(false)
-		end
-
-		if(util.tobool(self:GetClientNumber("weld"))) then
-			phys:EnableMotion(false) -- The timer allows the keypad to fall slightly, no thanks
-
-			timer.Simple(0, function()
-				if(IsValid(ent) and IsValid(trace_ent)) then
-					local weld = constraint.Weld(ent, trace_ent)
-
-					if(not util.tobool(self:GetClientNumber("freeze"))) then
-						phys:EnableMotion(true)
-					end
-				end
-			end)
-
-			ent:GetPhysicsObject():EnableCollisions(false)
-		end
-
 		undo.AddEntity(ent)
 		undo.SetPlayer(ply)
 	undo.Finish()
@@ -157,7 +149,7 @@ function TOOL:LeftClick(tr)
 end
 
 
-if(CLIENT) then
+if CLIENT then
 	local function ResetSettings(ply)
 		ply:ConCommand("keypad_willox_wire_repeats_granted 0")
 		ply:ConCommand("keypad_willox_wire_repeats_denied 0")
