@@ -1,141 +1,61 @@
-AddCSLuaFile("cl_init.lua")
-AddCSLuaFile("sh_init.lua")
+AddCSLuaFile "cl_init.lua"
+AddCSLuaFile "cl_maths.lua"
+AddCSLuaFile "cl_panel.lua"
+AddCSLuaFile "sh_init.lua"
 
-include("sh_init.lua")
+include "sh_init.lua"
 
-util.AddNetworkString("keypad_wire_command")
+util.AddNetworkString("Keypad_Wire")
 
-net.Receive("keypad_wire_command", function(len, ply)
-	if(IsValid(ply)) then
-		local ent = net.ReadEntity()
 
-		if(ent:GetClass() == "keypad_wire" and ply:EyePos():Distance(ent:GetPos()) <= 50) then
-			local cmd = net.ReadUInt(3)
-			if(cmd == ent.Command_Enter) then
-				local num = net.ReadUInt(4)
+net.Receive("Keypad_Wire", function(_, ply)
+	local ent = net.ReadEntity()
 
-				if(num <= 9) then
-					num = tostring(num)
+	if not IsValid(ply) or not IsValid(ent) or not ent:GetClass():lower() == "keypad_wire" then
+		return
+	end
 
-					ent:EnterNum(num)
-				end
-			elseif(cmd == ent.Command_Reset) then
-				ent:ResetButton()
-			elseif(cmd == ent.Command_Accept) then
-				ent:Submit()
-			end
+	if ent:GetStatus() ~= ent.Status_None then
+		return
+	end
+
+	if ply:EyePos():Distance(ent:GetPos()) >= 100 then
+		return
+	end
+
+	local command = net.ReadUInt(4)
+
+	if command == ent.Command_Enter then
+		local val = tonumber(ent:GetValue() .. net.ReadUInt(8))
+
+		if val and val > 0 and val <= 9999 then
+			ent:SetValue(tostring(val))
+			ent:EmitSound("buttons/button15.wav")
+		end
+	elseif command == ent.Command_Abort then
+		ent:SetValue("")
+	elseif command == ent.Command_Accept then
+		if ent:GetValue() == ent:GetPassword() then
+			ent:Process(true)
+		else
+			ent:Process(false)
 		end
 	end
 end)
 
-util.PrecacheSound("buttons/button14.wav")
-util.PrecacheSound("buttons/button9.wav")
-util.PrecacheSound("buttons/button11.wav")
-util.PrecacheSound("buttons/button15.wav")
+function ENT:SetValue(val)
+	self.Value = val
 
-AccessorFunc(ENT, "var_Input", "Input", FORCE_STRING)
-
-function ENT:Initialize()
-	if not WireLib then self:Remove() return end
-
-	self:SetModel("models/props_lab/keypad.mdl")
-	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetMoveType(MOVETYPE_VPHYSICS)
-	self:SetSolid(SOLID_VPHYSICS)
-
-	local phys = self:GetPhysicsObject()
-
-	if IsValid(phys) then
-		phys:Wake()
-	end
-
-	self.Password = false
-
-	if(not self.KeypadData) then
-		self.KeypadData = {
-			Password = false,
-
-			RepeatsGranted = 0,
-			RepeatsDenied = 0,
-
-			LengthGranted = 0,
-			LengthDenied = 0,
-
-			DelayGranted = 0,
-			DelayDenied = 0,
-
-			InitDelayGranted = 0,
-			InitDelayDenied = 0,
-
-			OutputOn = 0,
-			OutputOff = 0,
-
-			Secure = false,
-			Owner = NULL
-		}
-	end
-
-	self:Reset()
-
-	self.Outputs = Wire_CreateOutputs(self, {"Access Granted", "Access Denied"})
-end
-
-function ENT:SetPassword(pass)
-	self.KeypadData.Password = tostring(pass)
-
-	self:Reset()
-end
-
-function ENT:GetPassword(pass)
-	return self.KeypadData.Password or ""
-end
-
-function ENT:SetData(data)
-	self.KeypadData = data
-
-	self:Reset()
-end
-
-function ENT:EnterNum(num)
-	if(self:GetStatus() == self.Status_None) then
-		local num = tostring(num)
-		local new_input = self:GetInput()..num
-
-		self:SetInput(new_input:sub(1, 4))
-
-		if(self.KeypadData.Secure) then
-			self:SetDisplayText(string.rep("*", #self:GetInput()))
-		else
-			self:SetDisplayText(self:GetInput())
-		end
-
-		self:EmitSound("buttons/button15.wav")
+	if self:GetSecure() then
+		self:SetText(string.rep("*", #val))
+	else
+		self:SetText(val)
 	end
 end
 
-function ENT:Submit()
-	if(self:GetStatus() == self.Status_None) then
-		local success = tostring(self:GetInput()) == tostring(self:GetPassword())
-
-		self:Process(success)
-	end
+function ENT:GetValue()
+	return self.Value
 end
-
-function ENT:ResetButton()
-	if(self:GetStatus() == self.Status_None) then
-		self:EmitSound("buttons/button14.wav")
-		self:Reset()
-	end
-end
-
-function ENT:Reset()
-	self:SetDisplayText("")
-	self:SetInput("")
-	self:SetStatus(self.Status_None)
-
-	self:SetSecure(self.KeypadData.Secure)
-end
-
 
 function ENT:Process(granted)
 	local length, repeats, delay, initdelay, owner, outputKey
@@ -191,22 +111,22 @@ function ENT:Process(granted)
 	end
 end
 
-local function HandleDuplication(ply, data, dupedata)
-	local ent = ents.Create("keypad_wire")
-	duplicator.DoGeneric(ent, dupedata)
+function ENT:SetData(data)
+	self.KeypadData = data
 
-	ent:Spawn()
-
-	duplicator.DoGenericPhysics(ent, ply, dupedata)
-
-	data['Owner'] = ply
-	ent:SetData(data)
-
-	if(IsValid(ply)) then
-		ply:AddCount("keypads", ent)
-	end
-	
-	return ent
+	self:SetPassword(data.Password or "1337")
+	self:Reset()
 end
 
-duplicator.RegisterEntityClass("keypad_wire", HandleDuplication, "KeypadData", "Data")
+function ENT:GetData()
+	return self.KeypadData
+end
+
+function ENT:Reset()
+	self:SetValue("")
+	self:SetStatus(self.Status_None)
+	self:SetSecure(self.KeypadData.Secure)
+
+	Wire_TriggerOutput(self, "Access Granted", self.KeypadData.OutputOff)
+	Wire_TriggerOutput(self, "Access Denied", self.KeypadData.OutputOff)
+end
