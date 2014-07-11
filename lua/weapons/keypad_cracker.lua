@@ -132,7 +132,7 @@ function SWEP:Succeed()
 	local ent = tr.Entity
 	self:SetWeaponHoldType(self.IdleStance)
 
-	if SERVER and IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and (ent:GetClass() == "keypad" or ent:GetClass() == "keypad_wire") then
+	if SERVER and IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and ent.IsKeypad then
 		ent:Process(true)
 
 		net.Start("KeypadCracker_Hold")
@@ -178,7 +178,7 @@ function SWEP:Think()
 	if self.IsCracking and IsValid(self.Owner) then
 		local tr = self.Owner:GetEyeTrace()
 
-		if not IsValid(tr.Entity) or tr.HitPos:Distance(self.Owner:GetShootPos()) > 50 or (tr.Entity:GetClass() ~= "keypad" and tr.Entity:GetClass() ~= "keypad_wire") then
+		if not IsValid(tr.Entity) or tr.HitPos:Distance(self.Owner:GetShootPos()) > 50 or not tr.Entity.IsKeypad then
 			self:Fail()
 		elseif self.EndCrack <= CurTime() then
 			self:Succeed()
@@ -262,7 +262,7 @@ if(CLIENT) then
 		local ent = net.ReadEntity()
 		local state = (net.ReadBit() == 1)
 
-		if IsValid(ent) and ent:IsWeapon() and ent:GetClass() == "keypad_cracker" and not game.SinglePlayer() and ent.SetWeaponHoldType then
+		if IsValid(ent) and ent:IsWeapon() and ent:GetClass():lower() == "keypad_cracker" and not game.SinglePlayer() and ent.SetWeaponHoldType then
 			if not state then
 				ent:SetWeaponHoldType(ent.IdleStance)
 				ent.IsCracking = false
