@@ -1,8 +1,8 @@
 {
     "ignore": [
-        "*.psd", 
-        "*.vcproj", 
-        "*.svn*"
+        ".git/*",
+        "LICENSE",
+        "README.md"
     ], 
     "tags": [
         "roleplay", 
