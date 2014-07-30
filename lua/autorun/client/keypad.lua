@@ -54,12 +54,14 @@ for i = KEY_PAD_1, KEY_PAD_9 do
 	end
 end
 
-hook.Add("CreateMove", "Keypad", function(cmd)
+local last_press = 0
 
-	if not IsFirstTimePredicted() then
+hook.Add("CreateMove", "Keypad", function(cmd)
+	
+	if RealTime() - 0.1 < last_press then
 		return
 	end
-	
+
 	for key, handler in pairs(physical_keypad_commands) do
 		if input.WasKeyPressed(key) then
 
@@ -77,6 +79,8 @@ hook.Add("CreateMove", "Keypad", function(cmd)
 				return
 			end
 
+			last_press = RealTime()
+			
 			handler(ent)
 
 			return
