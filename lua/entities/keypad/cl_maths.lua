@@ -42,7 +42,7 @@ function ENT:CalculateRenderPos()
 		pos:Add(self:GetRight() * self.Maxs.y) -- Translate to left
 		pos:Add(self:GetUp() * self.Maxs.z) -- Translate to top
 
-		pos:Add(self:GetForward() * 0.05) -- Pop out of front to stop culling
+		pos:Add(self:GetForward() * 0.15) -- Pop out of front to stop culling
 
 	return pos
 end
