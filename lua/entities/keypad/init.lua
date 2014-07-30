@@ -19,7 +19,7 @@ net.Receive("Keypad", function(_, ply)
 		return
 	end
 
-	if ply:EyePos():Distance(ent:GetPos()) >= 100 then
+	if ply:EyePos():Distance(ent:GetPos()) >= 120 then
 		return
 	end
 
