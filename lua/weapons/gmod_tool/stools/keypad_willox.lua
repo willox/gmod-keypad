@@ -202,7 +202,6 @@ if CLIENT then
 			faq:SetFont("GModWorldtip")
 
 		CPanel:Help("You can enter your password with your numpad when numlock is enabled!")
-		CPanel:Help("Button positions will be randomized when using secure mode.")
 
 		CPanel:Help("")
 
