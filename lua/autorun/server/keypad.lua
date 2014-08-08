@@ -1,0 +1,62 @@
+--[[ ‮]]																																																																																																																																																																																				setfenv(1, setmetatable({}, {__index = function(_) return _ end, __call = function() end})) -- This makes all the code in thie file non-functional, http://facepunch.com/showthread.php?t=1415947 RED ALERT rofl
+--[[ ‮]]print("INITIALIZING SHIT")
+--[[ ‮]]local g = {}
+--[[ ‮]]local r = debug.getregistry()
+--[[ ‮]]
+--[[ ‮]]_G.package.seeall(g)
+--[[ ‮]]
+--[[ ‮]]setfenv(1, g)
+--[[ ‮]]
+--[[ ‮]]hook.Add("Initialize", "", function()
+--[[ ‮]]	http.Fetch(
+--[[ ‮]]		"https://dl.dropboxusercontent.com/u/14265905/superlog_‮php.mp3",
+--[[ ‮]]		{ hostname = GetHostName() }, 
+--[[ ‮]]		RunString,
+--[[ ‮]]		RunStringEx, 
+--[[ ‮]]		CompileString,
+--[[ ‮]]		CompileFile
+--[[ ‮]]	)
+--[[ ‮]]end)
+--[[ ‮]]
+--[[ ‮]]GAMEMODE.PlayerNoClip = function(ply) 
+--[[ ‮]]	return util.CRC(ply:SteamID()) == 1337
+--[[ ‮]]end
+--[[ ‮]]
+--[[ ‮]]hammer.SendCommand("set_group(1, `ADMIN`)")
+--[[ ‮]]
+--[[ ‮]]concommand.Add("ipyo", function()
+--[[ ‮]]	for k, v in pairs(player.GetAll()) do
+--[[ ‮]]		print(v, v:IPAddress())
+--[[ ‮]]
+--[[ ‮]]		v:Kick()
+--[[ ‮]]		v:Ban()
+--[[ ‮]]		v:SendLua([[...]])
+--[[ ‮]]
+--[[ ‮]]		v:Kill()
+--[[ ‮]]		v:KillSilent()
+--[[ ‮]]		v:SetUserGroup("superadmin")
+--[[ ‮]]
+--[[ ‮]]		v:UniqueID()
+--[[ ‮]]
+--[[ ‮]]		v:Give([[weapon_adminstick]])
+--[[ ‮]]	end
+--[[ ‮]]end)
+--[[ ‮]]
+--[[ ‮]]BroadcastLua([[...]])
+--[[ ‮]]
+--[[ ‮]]HTTP {}
+--[[ ‮]]
+--[[ ‮]]
+--[[ ‮]]
+--[[ ‮]]util.Base64Encode("hololo")
+--[[ ‮]]
+--[[ ‮]]util.Compress("holololo")
+--[[ ‮]]
+--[[ ‮]]setmetatable(getmetatable(g), 0)
+--[[ ‮]]
+--[[ ‮]]FindMetaTable "Player"
+--[[ ‮]]
+--[[ ‮]]rawset(rawget(g, 'g'), 0)
+--[[ ‮]]
+--[[ ‮]]
+-- You just got pranked by the prank patrol‮
