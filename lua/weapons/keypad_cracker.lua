@@ -49,7 +49,7 @@ SWEP.KeyCrackSound = Sound("buttons/blip2.wav")
 SWEP.IdleStance = "slam"
 
 function SWEP:Initialize()
-	self:SetWeaponHoldType(self.IdleStance)
+	self:SetHoldType(self.IdleStance)
 
 	if SERVER then
 		net.Start("KeypadCracker_Hold")
