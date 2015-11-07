@@ -2,7 +2,7 @@
 
 AddCSLuaFile()
 
-local keypad_crack_time = CreateConVar("keypad_crack_time", "30", {FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Seconds for keypad cracker to crack keypad")
+local keypad_crack_time = CreateConVar("keypad_crack_time", "30", {FCVAR_ARCHIVE}, "Seconds for keypad cracker to crack keypad")
 
 if SERVER then
 	util.AddNetworkString("KeypadCracker_Hold")
@@ -43,7 +43,6 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 
-SWEP.KeyCrackTime = 30
 SWEP.KeyCrackSound = Sound("buttons/blip2.wav")
 
 SWEP.IdleStance = "slam"
@@ -56,10 +55,14 @@ function SWEP:Initialize()
 			net.WriteEntity(self)
 			net.WriteBit(true)
 		net.Broadcast()
-	end
 
-	self.KeyCrackTime = keypad_crack_time:GetInt()
+		self:SetCrackTime( keypad_crack_time:GetInt() )
+	end
 end	
+
+function SWEP:SetupDataTables()
+	self:NetworkVar( "Int", 0, "CrackTime" )
+end
 
 function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + 0.4)
@@ -74,7 +77,7 @@ function SWEP:PrimaryAttack()
 	if IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and ent.IsKeypad then
 		self.IsCracking = true
 		self.StartCrack = CurTime()
-		self.EndCrack = CurTime() + self.KeyCrackTime
+		self.EndCrack = CurTime() + self:GetCrackTime()
 
 		self:SetWeaponHoldType("pistol") -- TODO: Send as networked message for other clients to receive
 
@@ -85,7 +88,7 @@ function SWEP:PrimaryAttack()
 				net.WriteBit(true)
 			net.Broadcast()
 
-			timer.Create("KeyCrackSounds: "..self:EntIndex(), 1, self.KeyCrackTime, function()
+			timer.Create("KeyCrackSounds: "..self:EntIndex(), 1, self:GetCrackTime(), function()
 				if IsValid(self) and self.IsCracking then
 					self:EmitSound(self.KeyCrackSound, 100, 100)
 					
@@ -205,7 +208,7 @@ if(CLIENT) then
 		if self.IsCracking then
 			if not self.StartCrack then
 				self.StartCrack = CurTime()
-				self.EndCrack = CurTime() + self.KeyCrackTime
+				self.EndCrack = CurTime() + self:GetCrackTime()
 			end
 
 			local frac = math.Clamp((CurTime() - self.StartCrack) / (self.EndCrack - self.StartCrack), 0, 1) -- Between 0 and 1 (a fraction omg segregation)
