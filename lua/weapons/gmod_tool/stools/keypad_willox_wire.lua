@@ -209,10 +209,6 @@ if CLIENT then
 				faq:SetFont("GModWorldtip")
 
 			CPanel:Help("You can enter your password with your numpad when numlock is enabled!")
-
-			CPanel:Help("")
-
-			CPanel:Help("Created by Willox ( http://steamcommunity.com/id/wiox )")
         end
 	end
 end
