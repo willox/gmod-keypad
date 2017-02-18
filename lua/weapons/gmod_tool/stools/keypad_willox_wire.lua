@@ -87,7 +87,7 @@ function TOOL:RightClick(tr)
 		return false
 	end
 
-	if trace_ent.KeypadData.Owner == ply then
+	if trace_ent:GetData().Owner == ply then
 		self:SetupKeypad(trace_ent, password)
 
 		return true

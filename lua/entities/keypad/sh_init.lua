@@ -42,29 +42,8 @@ function ENT:Initialize()
 		self:SetValue("")
 		self:SetPassword("1337")
 
-		if(not self.KeypadData) then
-			self:SetData({
-				Password = 1337,
-
-				RepeatsGranted = 0,
-				RepeatsDenied = 0,
-
-				LengthGranted = 0,
-				LengthDenied = 0,
-
-				DelayGranted = 0,
-				DelayDenied = 0,
-
-				InitDelayGranted = 0,
-				InitDelayDenied = 0,
-
-				KeyGranted = 0,
-				KeyDenied = 0,
-
-				Secure = false,
-				Owner = NULL
-			})
-		end
+		-- Initialize defaults
+		self:GetData()
 
 		self:Reset()
 	end

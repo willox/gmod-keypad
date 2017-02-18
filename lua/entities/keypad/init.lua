@@ -58,6 +58,8 @@ function ENT:GetValue()
 end
 
 function ENT:Process(granted)
+	self:GetData()
+	
 	local length, repeats, delay, initdelay, owner, key
 
 	if(granted) then
@@ -119,11 +121,35 @@ function ENT:SetData(data)
 end
 
 function ENT:GetData()
+	if not self.KeypadData then
+		self:SetData( {
+			Password = 1337,
+
+			RepeatsGranted = 0,
+			RepeatsDenied = 0,
+
+			LengthGranted = 0,
+			LengthDenied = 0,
+
+			DelayGranted = 0,
+			DelayDenied = 0,
+
+			InitDelayGranted = 0,
+			InitDelayDenied = 0,
+
+			KeyGranted = 0,
+			KeyDenied = 0,
+
+			Secure = false,
+			Owner = NULL
+		} )
+	end
+
 	return self.KeypadData
 end
 
 function ENT:Reset()
 	self:SetValue("")
 	self:SetStatus(self.Status_None)
-	self:SetSecure(self.KeypadData.Secure)
+	self:SetSecure(self:GetData().Secure)
 end
