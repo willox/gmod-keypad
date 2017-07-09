@@ -11,7 +11,7 @@ util.AddNetworkString("Keypad")
 net.Receive("Keypad", function(_, ply)
 	local ent = net.ReadEntity()
 
-	if not IsValid(ply) or not IsValid(ent) or not ent:GetClass():lower() == "keypad" then
+	if not IsValid(ply) or not IsValid(ent) or ent:GetClass():lower() ~= "keypad" then
 		return
 	end
 
