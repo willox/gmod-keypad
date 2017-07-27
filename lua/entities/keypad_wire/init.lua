@@ -60,25 +60,23 @@ end
 function ENT:Process(granted)
 	self:GetData()
 
-	local length, repeats, delay, initdelay, owner, outputKey
+	local length, repeats, delay, initdelay, outputKey
 
 	if(granted) then
 		self:SetStatus(self.Status_Granted)
 
-		length = self.KeypadData.LengthGranted
-		repeats = math.min(self.KeypadData.RepeatsGranted, 50)
-		delay = self.KeypadData.DelayGranted
+		length    = self.KeypadData.LengthGranted
+		repeats   = math.min(self.KeypadData.RepeatsGranted, 50)
+		delay     = self.KeypadData.DelayGranted
 		initdelay = self.KeypadData.InitDelayGranted
-		owner = self.KeypadData.Owner
 		outputKey = "Access Granted"
 	else
 		self:SetStatus(self.Status_Denied)
 
-		length = self.KeypadData.LengthDenied
-		repeats = math.min(self.KeypadData.RepeatsDenied, 50)
-		delay = self.KeypadData.DelayDenied
+		length    = self.KeypadData.LengthDenied
+		repeats   = math.min(self.KeypadData.RepeatsDenied, 50)
+		delay     = self.KeypadData.DelayDenied
 		initdelay = self.KeypadData.InitDelayDenied
-		owner = self.KeypadData.Owner
 		outputKey = "Access Denied"
 	end
 
@@ -92,13 +90,13 @@ function ENT:Process(granted)
 		if(IsValid(self)) then
 			for i = 0, repeats do
 				timer.Simple(length * i + delay * i, function()
-					if(IsValid(self) and IsValid(owner)) then
+					if(IsValid(self)) then
 						Wire_TriggerOutput(self, outputKey, self.KeypadData.OutputOn)
 					end
 				end)
 
 				timer.Simple(length * (i + 1) + delay * i, function()
-					if(IsValid(self) and IsValid(owner)) then
+					if(IsValid(self)) then
 						Wire_TriggerOutput(self, outputKey, self.KeypadData.OutputOff)
 					end
 				end)
@@ -145,8 +143,7 @@ function ENT:GetData()
 			OutputOn = 0,
 			OutputOff = 0,
 
-			Secure = false,
-			Owner = NULL
+			Secure = false
 		} )
 	end
 

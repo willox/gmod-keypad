@@ -62,9 +62,7 @@ function TOOL:SetupKeypad(ent, pass)
 		OutputOn = self:GetClientNumber("output_on"),
 		OutputOff = self:GetClientNumber("output_off"),
 
-		Secure = util.tobool(self:GetClientNumber("secure")),
-
-		Owner = self:GetOwner()
+		Secure = util.tobool(self:GetClientNumber("secure"))
 	}
 
 	ent:SetData(data)
@@ -87,11 +85,8 @@ function TOOL:RightClick(tr)
 		return false
 	end
 
-	if trace_ent:GetData().Owner == ply then
-		self:SetupKeypad(trace_ent, password)
-
-		return true
-	end
+	self:SetupKeypad(trace_ent, password)
+	return true
 end
 
 function TOOL:LeftClick(tr)
