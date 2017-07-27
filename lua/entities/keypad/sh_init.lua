@@ -19,6 +19,7 @@ ENT.Command_Abort = 2
 ENT.IsKeypad = true
 
 AccessorFunc(ENT, "m_Password", "Password", FORCE_STRING)
+AccessorFunc(ENT, "m_KeypadOwner", "KeypadOwner")
 
 function ENT:Initialize()
 	self:SetModel(self.Model)
@@ -41,6 +42,7 @@ function ENT:Initialize()
 
 		self:SetValue("")
 		self:SetPassword("1337")
+		self:SetKeypadOwner(NULL)
 
 		-- Initialize defaults
 		self:GetData()

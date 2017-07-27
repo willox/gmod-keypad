@@ -60,27 +60,27 @@ end
 function ENT:Process(granted)
 	self:GetData()
 	
-	local length, repeats, delay, initdelay, owner, key
+	local length, repeats, delay, initdelay, key
 
 	if(granted) then
 		self:SetStatus(self.Status_Granted)
 
-		length = self.KeypadData.LengthGranted
-		repeats = math.min(self.KeypadData.RepeatsGranted, 50)
-		delay = self.KeypadData.DelayGranted
+		length    = self.KeypadData.LengthGranted
+		repeats   = math.min(self.KeypadData.RepeatsGranted, 50)
+		delay     = self.KeypadData.DelayGranted
 		initdelay = self.KeypadData.InitDelayGranted
-		owner = self.KeypadData.Owner
-		key = tonumber(self.KeypadData.KeyGranted) or 0
+		key       = tonumber(self.KeypadData.KeyGranted) or 0
 	else
 		self:SetStatus(self.Status_Denied)
 
-		length = self.KeypadData.LengthDenied
-		repeats = math.min(self.KeypadData.RepeatsDenied, 50)
-		delay = self.KeypadData.DelayDenied
+		length    = self.KeypadData.LengthDenied
+		repeats   = math.min(self.KeypadData.RepeatsDenied, 50)
+		delay     = self.KeypadData.DelayDenied
 		initdelay = self.KeypadData.InitDelayDenied
-		owner = self.KeypadData.Owner
-		key = tonumber(self.KeypadData.KeyDenied) or 0
+		key       = tonumber(self.KeypadData.KeyDenied) or 0
 	end
+
+	local owner = self:GetKeypadOwner()
 
 	timer.Simple(math.max(initdelay + length * (repeats + 1) + delay * repeats + 0.25, 2), function() -- 0.25 after last timer
 		if(IsValid(self)) then
@@ -141,8 +141,7 @@ function ENT:GetData()
 			KeyGranted = 0,
 			KeyDenied = 0,
 
-			Secure = false,
-			Owner = NULL
+			Secure = false
 		} )
 	end
 
@@ -157,5 +156,6 @@ end
 
 
 duplicator.RegisterEntityModifier( "keypad_password_passthrough", function(ply, entity, data)
+	entity:SetKeypadOwner(ply)
     entity:SetData(data)
 end)
