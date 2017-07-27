@@ -118,6 +118,7 @@ function ENT:SetData(data)
 
 	self:SetPassword(data.Password or "1337")
 	self:Reset()
+	duplicator.StoreEntityModifier(self, "keypad_wire_password_passthrough", self.KeypadData)
 end
 
 function ENT:GetData()
@@ -162,3 +163,7 @@ function ENT:Reset()
 	Wire_TriggerOutput(self, "Access Granted", self.KeypadData.OutputOff)
 	Wire_TriggerOutput(self, "Access Denied", self.KeypadData.OutputOff)
 end
+
+duplicator.RegisterEntityModifier( "keypad_wire_password_passthrough", function(ply, entity, data)
+    entity:SetData(data)
+end)

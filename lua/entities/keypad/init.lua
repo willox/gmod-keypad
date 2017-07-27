@@ -118,6 +118,7 @@ function ENT:SetData(data)
 
 	self:SetPassword(data.Password or "1337")
 	self:Reset()
+	duplicator.StoreEntityModifier(self, "keypad_password_passthrough", self.KeypadData)
 end
 
 function ENT:GetData()
@@ -153,3 +154,8 @@ function ENT:Reset()
 	self:SetStatus(self.Status_None)
 	self:SetSecure(self:GetData().Secure)
 end
+
+
+duplicator.RegisterEntityModifier( "keypad_password_passthrough", function(ply, entity, data)
+    entity:SetData(data)
+end)
