@@ -23,6 +23,12 @@ net.Receive("Keypad_Wire", function(_, ply)
 		return
 	end
 
+	if ent.Next_Command_Time and ent.Next_Command_Time > CurTime() then
+		return
+	end
+
+	ent.Next_Command_Time = CurTime() + 0.05
+
 	local command = net.ReadUInt(4)
 
 	if command == ent.Command_Enter then
