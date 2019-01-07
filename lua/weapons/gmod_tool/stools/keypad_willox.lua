@@ -68,7 +68,7 @@ function TOOL:SetupKeypad(ent, pass)
 end
 
 function TOOL:RightClick(tr)
-	if not IsValid(tr.Entity) or not tr.Entity:GetClass():lower() == "keypad" then return false end
+	if not IsValid(tr.Entity) or tr.Entity:GetClass():lower() != "keypad" then return false end
 
 	if CLIENT  then return true end
 
@@ -82,8 +82,7 @@ function TOOL:RightClick(tr)
 		ply:PrintMessage(3, "Invalid password!")
 		return false
 	end
-
-	if trace_ent:GetClass() == 'keypad' and trace_ent:GetKeypadOwner() == ply then
+	if trace_ent:GetKeypadOwner() == ply then
 		self:SetupKeypad(trace_ent, password)
 
 		return true
