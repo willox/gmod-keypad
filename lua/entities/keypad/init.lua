@@ -15,7 +15,7 @@ net.Receive("Keypad", function(_, ply)
 		return
 	end
 
-	if ent:GetStatus() ~= ent.Status_None then
+	if ent.GetStatus == nil or ent:GetStatus() ~= ent.Status_None then
 		return
 	end
 
