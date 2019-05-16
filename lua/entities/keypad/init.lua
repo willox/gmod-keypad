@@ -43,8 +43,10 @@ net.Receive("Keypad", function(_, ply)
 	elseif command == ent.Command_Accept then
 		if ent:GetValue() == ent:GetPassword() then
 			ent:Process(true)
+			hook.Run("keypad_access_granted", ent, ply)
 		else
 			ent:Process(false)
+			hook.Run("keypad_access_denied", ent, ply)
 		end
 	end
 end)

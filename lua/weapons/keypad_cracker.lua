@@ -137,6 +137,7 @@ function SWEP:Succeed()
 
 	if SERVER and IsValid(ent) and tr.HitPos:Distance(self.Owner:GetShootPos()) <= 50 and ent.IsKeypad then
 		ent:Process(true)
+		hook.Run("keypad_cracked", ent, self.Owner)
 
 		net.Start("KeypadCracker_Hold")
 			net.WriteEntity(self)
